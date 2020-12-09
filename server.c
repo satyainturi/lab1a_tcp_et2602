@@ -1,4 +1,4 @@
-//#define _WINDOWS
+
 
 #include <stdio.h>
 #include <unistd.h>
@@ -14,7 +14,7 @@
 #endif
 #include "proc.h"
 
-// Protocals supported in server side.
+
 #define PROTOCALS "TEXT TCP 1.0\nTEXT TCP 1.2\n"
 
 
@@ -179,59 +179,3 @@ void get_user_input_command(struct command* cmd) {
 	}
 }
 
-void process(int connfd) {
-	// check client's protocal version.
-	// if the client accepts the protocol, it should respond with "OK".
-	if (check_protocal_version(connfd) != 0) {
-		printf("The client don't support protocal.\n");
-		return;
-	}
-
-	// create command to be sent to the client.
-	struct command cmd;
-	create_command(&cmd); //get_user_input_command(&cmd);
-	
-
-	char msg[400];
-	get_command_string(&cmd, msg);
-	printf("Send message %s", msg);
-
-	int result = send(connfd, msg, strlen(msg) + 1, 0);
-	if (result < 0) {
-		printf("Socket error.\n");
-		return;
-	}
-
-	memset(msg, 0, sizeof(msg));
-	result = recv(connfd, msg, sizeof(msg), 0);
-	if (result < 0) {
-		printf("Socket error.\n");
-		return;
-	}
-	printf("Received '%s' from the client\n", msg);
-
-	double server_val = calculate(&cmd);
-	//printf("Server value is '%.8g'\n", server_val);
-
-	double client_val = 0.0;
-	sscanf(msg, "%lg", &client_val);
-	//printf("Client value is '%.8g'\n", client_val);
-
-	char* response = "OK";
-	if (server_val != client_val) {
-		//There is a issue in double operation. 
-		//Double operation result is sligty different every computers.
-		if (cmd.str[0] == 'f') {
-			if (fabs(server_val - client_val) > 1) {
-				response = "ERROR";
-			}
-		}
-	}
-	printf("Compare result is %s\n", response);
-	
-	result = send(connfd, response, strlen(response) + 1, 0);
-	if (result < 0) {
-		printf("Socket error.\n");
-		return;
-	}
-}
