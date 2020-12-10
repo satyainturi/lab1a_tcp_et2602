@@ -7,9 +7,9 @@ struct command {
 	double fval1, fval2;
 };
 
-void create_command(struct command cmd);
-void get_command_string(struct command cmd, char msg);
-double calculate(struct command cmd);
-char compare_value(struct command cmd, char msg);
+void create_command(struct command* cmd);
+void get_command_string(struct command* cmd, char* msg);
+double calculate(struct command* cmd);
+char* compare_value(struct command* cmd, char* msg);
 
 #endif
